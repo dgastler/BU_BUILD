@@ -2,7 +2,7 @@
 
 # \var dtsi_output_path
 #Location where the output dtsi/dtsi_chunk/dtsi_post_chunk files will be put
-global dtsi_output_path ;set dtsi_output_path "${apollo_root_path}/kernel/hw/${build_name}"
+global dtsi_output_path ;set dtsi_output_path "${DTSI_PATH}"
 
 # Global variable \c axi_memory_mappings_addr
 # A global variable containing all the address assignments.  Used for package and header listings of endpoint to address

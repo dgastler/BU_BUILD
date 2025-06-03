@@ -376,19 +376,21 @@ proc GENERATE_PL_MASTER_FOR_INTERCONNECT {params} {
 #optional values:
 #  global_signal:  Make this a global signal in the TCL (default false)
 #  add_rst_n:      Add a reset_n signal to go along with this clock
+#  add_rst:      Add a reset_n signal to go along with this clock
 #================================================================================
 proc ADD_PL_CLK {params} {     
     # required values
     set_required_values $params {name freq}
 
     # optional values
-    set_optional_values $params [dict create global_signal false add_rst_n false]
+    set_optional_values $params [dict create \
+				     global_signal false \
+				     add_rst_n false \
+				     add_rst false ]
 
-    
     #create this clock
     set clk_name [string toupper ${name}_clk] 
     set clk_freq [string toupper ${name}_clk_freq]
-
     
     create_bd_port -q -dir I -type clk $clk_name
     set_property CONFIG.FREQ_HZ $freq  [get_bd_ports $clk_name]
@@ -402,10 +404,19 @@ proc ADD_PL_CLK {params} {
 	set local_clk_freq $freq
 	Add_Global_Constant ${clk_freq} integer ${freq}
     }
-
     
     #check if we are also making a reset
-    if { $add_rst_n } {
+    if { $add_rst } {
+	set rst_name [string toupper ${name}_rst]
+	create_bd_port -q -dir I -type rst $rst_name
+	set_property CONFIG.ASSOCIATED_RESET $rst_name [get_bd_ports $clk_name]
+	if { $global_signal } {
+	    global $rst_name
+	    upvar 0 $rst_name local_rst_name
+	    set local_rst_name $rst_name
+	}
+
+    } elseif { $add_rst_n } {
 	set rst_n_name [string toupper ${name}_rstn]
 	create_bd_port -q -dir I -type rst $rst_n_name
 	set_property CONFIG.ASSOCIATED_RESET $rst_n_name [get_bd_ports $clk_name]
@@ -415,7 +426,7 @@ proc ADD_PL_CLK {params} {
 	    set local_rst_n_name $rst_n_name
 	}
 
-    }
+    }    
 }
 
 

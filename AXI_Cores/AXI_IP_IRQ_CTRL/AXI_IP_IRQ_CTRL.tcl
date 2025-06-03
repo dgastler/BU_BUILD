@@ -8,7 +8,7 @@ proc AXI_IP_IRQ_CTRL {params} {
     # optional values
     set_optional_values $params [dict create addr {offset -1 range 64K} remote_slave 0]
 
-    set_optional_values $params [dict create sw_intr_count 0]
+    set_optional_values $params [dict create sw_intr_count 0 processor_clk false processor_rst false]
 
     create_bd_cell -type ip -vlnv [get_ipdefs -filter {NAME == axi_intc}] $device_name
 
@@ -18,6 +18,14 @@ proc AXI_IP_IRQ_CTRL {params} {
 
     #connect to AXI, clk, and reset between slave and mastre
     [AXI_DEV_CONNECT $params]
+
+    #connect up processor signals if specified
+    if {$processor_clk ne false} {
+	connect_bd_net [get_bd_pins ${device_name}/processor_clk] [get_bd_pins $processor_clk]
+    }
+    if {$processor_rst ne false} {
+	connect_bd_net [get_bd_pins ${device_name}/processor_rst] [get_bd_pins ${processor_rst}]
+    }
 
     connect_bd_net [get_bd_pins ${device_name}/irq] [get_bd_pins ${irq_dest}]
     set IRQ_CONCAT ${device_name}_IRQ

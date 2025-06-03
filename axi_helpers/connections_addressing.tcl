@@ -82,7 +82,7 @@ proc AXI_SET_ADDR {device_name axi_control {addr_offset -1} {addr_range 64K} {fo
 	    error $error_string
 	}
 	
-	pdict $BT	
+	#pdict $BT	
     }
 
 

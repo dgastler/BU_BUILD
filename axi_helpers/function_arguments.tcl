@@ -10,7 +10,6 @@ proc set_default {dict key default} {
         puts "setting explicit $key"
         return [dict get $dict $key ]
     } else {
-        puts "$dict"
         puts "setting default $default for $key"
         return $default
     }
@@ -22,7 +21,7 @@ proc set_default {dict key default} {
 proc clear_global {variable} {
     upvar $variable testVar
     if { [info exists testVar] } {
-        puts "unsetting"
+        puts "unsetting $variable"
         unset testVar
     }
 }
@@ -45,7 +44,6 @@ proc set_required_values {params required_params {split_dict True}} {
             set val [dict get $params $key]
             if {$split_dict && [is_dict $val]} {
                 # handle dictionary arguments
-                #puts [dict size $val]
                 foreach subkey [dict keys $val] {
                     upvar 1 $subkey x ;# tie the calling value to variable x
                     set x [subst [dict get $val $subkey]]
@@ -53,7 +51,7 @@ proc set_required_values {params required_params {split_dict True}} {
                 }
             } else {
                 # handle non-dictionary arguments
-		puts "non-dictionary arguments $key $val"
+		#puts "non-dictionary arguments $key $val"
                 upvar 1 $key x ;# tie the calling value to variable x
                 set x $val
             }
@@ -77,7 +75,6 @@ proc set_optional_values {params optional_params } {
 
     foreach key [dict keys $optional_params]  {
         set def_val [dict get $optional_params $key]
-	
         # dictionary type parameters
         if {[is_dict $def_val] } {
 	    

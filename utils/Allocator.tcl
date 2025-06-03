@@ -70,7 +70,6 @@ proc CreateAllocator {axi_control_name} {
     #create the new buddy allocation tree
     set BT [CreateBuddyAllocation ${size} ${block_size} ${starting_address}]
     puts "Created BT $local_name"
-    pdict $BT
     
     #note the name for the global variable in the control set
     dict update axi_control allocator allocator {

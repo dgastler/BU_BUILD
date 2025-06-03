@@ -1,31 +1,47 @@
 proc IP_SYS_RESET {params} {
     # required values
-    set_required_values $params {device_name external_reset_n slowest_clk}
+    set_required_values $params {device_name slowest_clk}
 
     # optional values
-    set_optional_values $params {aux_reset "NULL"}
-    set_optional_values $params {aux_reset_n "NULL"}
+    set_optional_values $params {aux_reset false}
+    set_optional_values $params {aux_reset_n false}
+    set_optional_values $params {external_reset false}
+    set_optional_values $params {external_reset_n false}
+    set_optional_values $params {dcm_locked false}
+    set_optional_values $params {rst_width 1}
 
     #createIP
     create_bd_cell -type ip -vlnv [get_ipdefs -filter {NAME == proc_sys_reset}] $device_name
 
     #connect external reset
-    set_property -dict [list CONFIG.C_AUX_RST_WIDTH {1} CONFIG.C_AUX_RESET_HIGH {0}] [get_bd_cells $device_name]
-    connect_bd_net [get_bd_pins ${external_reset_n}] [get_bd_pins ${device_name}/ext_reset_in]
+    if {${external_reset} != false} {
+	set_property -dict [list CONFIG.C_EXT_RST_WIDTH ${rst_width} CONFIG.C_EXT_RESET_HIGH {1}] [get_bd_cells $device_name]
+	connect_bd_net [get_bd_pins ${external_reset}] [get_bd_pins ${device_name}/ext_reset_in]
+    } elseif {${external_reset_n} != false} {
+	set_property -dict [list CONFIG.C_EXT_RST_WIDTH ${rst_width} CONFIG.C_EXT_RESET_HIGH {0}] [get_bd_cells $device_name]
+	connect_bd_net [get_bd_pins ${external_reset_n}] [get_bd_pins ${device_name}/ext_reset_in]
+    }
+	
     #connect clock
     connect_bd_net [get_bd_pins ${slowest_clk}] [get_bd_pins ${device_name}/slowest_sync_clk]
 
     #aux_reset
-    if {${aux_reset} != "NULL"} {
-	set_property -dict [list CONFIG.C_AUX_RST_WIDTH {1} CONFIG.C_AUX_RESET_HIGH {1}] [get_bd_cells $device_name]
+    if {${aux_reset} != false} {
+	set_property -dict [list CONFIG.C_AUX_RST_WIDTH ${rst_width} CONFIG.C_AUX_RESET_HIGH {1}] [get_bd_cells $device_name]
 	connect_bd_net [get_bd_pins ${aux_reset}] [get_bd_pins ${device_name}/aux_reset_in]
     }
     #aux_reset_n (an error will result if you set both)
-    if {${aux_reset_n} != "NULL"} {
-	set_property -dict [list CONFIG.C_AUX_RST_WIDTH {1} CONFIG.C_AUX_RESET_HIGH {0}] [get_bd_cells $device_name]
+    if {${aux_reset_n} != false} {
+	set_property -dict [list CONFIG.C_AUX_RST_WIDTH ${rst_width} CONFIG.C_AUX_RESET_HIGH {0}] [get_bd_cells $device_name]
 	connect_bd_net [get_bd_pins ${aux_reset_n}] [get_bd_pins ${device_name}/aux_reset_in]
     }
 
+    #dcm_locked
+    if {${dcm_locked} != false} {
+	connect_bd_net [get_bd_pins ${dcm_locked}] [get_bd_pins ${device_name}/dcm_locked]
+    }
+
+    
     #Bus reset inverter
     set bus_rst_name ${device_name}_BUS_RST_N
     create_bd_cell -type ip -vlnv [get_ipdefs -filter {NAME == util_vector_logic}] ${bus_rst_name}

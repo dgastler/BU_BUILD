@@ -115,16 +115,14 @@ proc huddle_to_bd {huddle parent} {
 #
 proc yaml_to_control_sets {yaml_file} {
     global build_name
-    global apollo_root_path
+    #global apollo_root_path
     global autogen_path
     global BD_PATH
 
     if { [dict exists [yaml::yaml2dict -file [subst $yaml_file]] "AXI_CONTROL_SETS"] } {
 	set dict [dict get [yaml::yaml2dict -file [subst $yaml_file]] "AXI_CONTROL_SETS"]
-	puts $dict
 	puts "Adding AXI Control Sets"
-	foreach key [dict keys $dict] {
-	    puts $key
+	foreach key [dict keys $dict] {	    
 	    if { 0 == [string compare "INCLUDE_FILE" $key] } {
 		#this is an include directive, load the file and move forward
 		set subfile [dict get $dict $key]
