@@ -292,12 +292,12 @@ proc GENERATE_AXI_ADDR_MAP_VERILOG {outFileName} {
     puts ${outFile} "package AXISlaveAddrPkg ;"
 
     foreach {slave addr} ${axi_memory_mappings_addr} {
-	set line "parameter logic [31:0] AXI_ADDR_${slave} = x\"${addr}\";" 	
+	set line "parameter logic [31:0] AXI_ADDR_${slave} = 32'h${addr};" 	
 	puts ${outFile} $line
     }
     puts ${outFile} "// ranges"
     foreach {slave range} ${axi_memory_mappings_range} {
-	set line "parameter logic [31:0] AXI_RANGE_${slave} =  x\"${range}\";" 	
+	set line "parameter logic [31:0] AXI_RANGE_${slave} =  32'h${range};" 	
 	puts ${outFile} $line
     }
     puts ${outFile} "endpackage"
