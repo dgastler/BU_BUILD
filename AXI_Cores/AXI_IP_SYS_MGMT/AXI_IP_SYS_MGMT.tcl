@@ -5,6 +5,8 @@ proc AXI_IP_SYS_MGMT {params} {
 
     # optional values
     set_optional_values $params [dict create addr {offset -1 range 64K} remote_slave 0 enable_i2c_pins 0]
+    set_optional_values $params {vmon_out false}
+
     
     #create system management AXIL lite slave
     create_bd_cell -type ip -vlnv [get_ipdefs -filter {NAME == system_management_wiz }] ${device_name}
@@ -23,6 +25,12 @@ proc AXI_IP_SYS_MGMT {params} {
     
     #connect to interconnect
     [AXI_DEV_CONNECT $params]
+
+    #expose vmon port
+    if {$vmon_out != false} {
+	make_bd_intf_pins_external  [get_bd_intf_pins ${device_name}/vp]
+	make_bd_intf_pins_external  [get_bd_intf_pins ${device_name}/vn]
+    }
 
     
     #expose alarms
