@@ -28,8 +28,8 @@ proc AXI_IP_SYS_MGMT {params} {
 
     #expose vmon port
     if {$vmon_out != false} {
-	make_bd_intf_pins_external  [get_bd_intf_pins ${device_name}/vp]
-	make_bd_intf_pins_external  [get_bd_intf_pins ${device_name}/vn]
+	make_bd_pins_external  [get_bd_pins ${device_name}/vp]
+	make_bd_pins_external  [get_bd_pins ${device_name}/vn]
     }
 
     
