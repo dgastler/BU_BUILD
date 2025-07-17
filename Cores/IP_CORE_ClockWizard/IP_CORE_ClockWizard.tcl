@@ -1,8 +1,5 @@
 
 proc IP_CORE_ClockWizard {params} {
-    global build_name
-    global apollo_root_path
-    global autogen_path
 
     set_required_values $params {device_name}
     set_required_values $params {in_clk_type}
