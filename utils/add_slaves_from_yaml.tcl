@@ -65,6 +65,7 @@ proc huddle_to_bd {huddle parent} {
 		dict append pairs device_name $parent
 		
 		foreach pairkey [huddle keys $tcl_call_huddle] {
+		    #add all pairs unless it is the special "command" key
 		    if { 0 != [string compare "command" $pairkey]} {
 			dict set pairs $pairkey [subst [huddle gets $tcl_call_huddle $pairkey]]
 		    }}
@@ -72,6 +73,7 @@ proc huddle_to_bd {huddle parent} {
 		puts "================================================================================"
 		puts "Executing command from YAML: $command \[dict create $pairs\]"
 		eval $command {$pairs}
+
 	    }	
         }
 	if { 0 == [string compare "INCLUDE_FILE" $key] } {
