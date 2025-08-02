@@ -261,6 +261,7 @@ proc ComputeAddressRange {} {
 proc GENERATE_AXI_ADDR_MAP_C {outFileName} {
     global axi_memory_mappings_addr
     global axi_memory_mappings_range
+    file mkdir [file dirname ${outFileName}]
     set outFile [open ${outFileName} w+]
     puts ${outFile} "#ifndef __AXI_ADDR_MAP__" 
     puts ${outFile} "#define __AXI_ADDR_MAP__"
