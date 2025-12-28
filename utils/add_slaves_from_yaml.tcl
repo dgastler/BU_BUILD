@@ -84,6 +84,9 @@ proc huddle_to_bd {huddle parent} {
 	    puts "loading sub-YAML file: $include_huddle"
 	    yaml_to_bd $include_huddle            
 	}
+	if { 0 == [string compare "ADDR_SPACES" $key] } {
+	    PROCESS_ADDR_SPACES [huddle $get_stripped_cmd $huddle $key]
+	}
 	if { 0 == [string compare "dict" [huddle type [huddle get $huddle $key]]]} {
             huddle_to_bd [huddle get $huddle $key] $key
         } elseif { 0 == [string compare "mapping" [huddle type [huddle get $huddle $key]]]} {

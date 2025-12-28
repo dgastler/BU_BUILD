@@ -5,7 +5,7 @@ source ${BD_PATH}/utils/Allocator.tcl
 source ${BD_PATH}/axi_helpers/connections_clk.tcl
 source ${BD_PATH}/axi_helpers/connections_addressing.tcl
 source ${BD_PATH}/axi_helpers/connections_lowlevel.tcl
-
+source ${BD_PATH}/axi_helpers/decoder_helpers.tcl
 
 ## proc \c AXI_PL_DEV_CONNECT
 #Arguments:
@@ -168,6 +168,13 @@ proc AXI_PL_DEV_CONNECT {params} {
     if {$remote_slave == 1} {
         AXI_DEV_UIO_DTSI_OVERLAY ${device_name} ${manual_load_dtsi} $dt_data
     }
+
+
+    #optional hdl decoder info
+    if {[dict exists $params DECODER]} {
+	UPDATE_DECODERS $device_name $new_addr [dict get $params DECODER]
+    }
+
 }
 
 ## proc \c AXI_DEV_CONNECT
