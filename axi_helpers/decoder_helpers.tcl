@@ -100,7 +100,7 @@ proc GENERATE_ADDRESS_TABLE {output_path output_filename {decoder_filter ""} } {
 		set table_filename [subst [dict get $table FILENAME]]
 		puts -nonewline $outfile [format "%-*s0x%08X          %s" $name_length $name $offset $table_filename]
 		if { [dict exists $table "SEARCH_PATH"] } {
-		    puts $outfile [format "   search_path=%s" [dict get $table "SEARCH_PATH"]]
+		    puts $outfile [format "   search_path=%s" [subst [dict get $table "SEARCH_PATH"]]]
 		} else {
 		    puts $outfile ""
 		}
