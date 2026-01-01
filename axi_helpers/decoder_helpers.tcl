@@ -4,7 +4,7 @@
 global decoders;    if {![info exists decoders]}    {set decoders [dict create]}
 global addr_tables; if {![info exists addr_tables]} {set addr_tables [dict create]}
 
-proc UPDATE_DECODERS {device_name device_offset decoder_node} {
+proc UPDATE_DECODERS {device_name device_offset device_mask decoder_node} {
     set_required_values $decoder_node {TEMPLATE}
 
     
@@ -29,6 +29,7 @@ proc UPDATE_DECODERS {device_name device_offset decoder_node} {
     dict set decoders $decoder_name TEMPLATE $TEMPLATE
     dict set decoders $decoder_name NAME $decoder_name
     dict set decoders $decoder_name BASE_ADDR $device_offset
+    dict set decoders $decoder_name BASE_MASK $device_mask
 }
 
 proc PROCESS_ADDR_SPACE {space_name space_node} {

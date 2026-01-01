@@ -172,7 +172,8 @@ proc AXI_PL_DEV_CONNECT {params} {
 
     #optional hdl decoder info
     if {[dict exists $params DECODER]} {
-	UPDATE_DECODERS $device_name $new_addr [dict get $params DECODER]
+	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
     }
 
 }
