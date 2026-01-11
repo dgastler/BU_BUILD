@@ -94,9 +94,12 @@ proc GENERATE_ADDRESS_TABLE {output_path output_filename {decoder_filter ""} } {
     dict for {decoder obj} $decoders {
 	if {[string equal $decoder_filter ""] ||
 	    [string equal $decoder_filter $decoder]} {
+	    #get the axi byte based offset
 	    set decoder_offset [dict get $obj "BASE_ADDR"]
+	    #get the 32bit version of the offset
+	    set decoder_offset32 [expr {$decoder_offset >> 2}]
 	    dict for {name table} [dict get $obj TABLES ] {
-		set offset [expr $decoder_offset + [dict get $table OFFSET]]
+		set offset [expr $decoder_offset32 + [dict get $table OFFSET]]
 		#apply subst to force variable substitution
 		set table_filename [subst [dict get $table FILENAME]]
 		puts -nonewline $outfile [format "%-*s0x%08X          %s" $name_length $name $offset $table_filename]
