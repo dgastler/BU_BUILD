@@ -41,6 +41,9 @@ proc AXI_CLK_CONNECT {device_name axi_clk axi_rstn {ms_type "s"}} {
     if { [string trim $src_clk] == "" } {
 	GET_BD_PINS_OR_PORTS src_clk $device_name/${ms_type}_AXI_ACLK
     }
+    if { [string trim $src_clk] == "" } {
+	GET_BD_PINS_OR_PORTS src_clk $device_name/AXI_aclk
+    }
 
     #handle reset source
     GET_BD_PINS_OR_PORTS src_rstn  $device_name/${ms_type}_axi_aresetn
@@ -58,6 +61,9 @@ proc AXI_CLK_CONNECT {device_name axi_clk axi_rstn {ms_type "s"}} {
     }
     if { [string trim $src_rstn] == "" } {
 	GET_BD_PINS_OR_PORTS src_rstn $device_name/${ms_type}_AXI_ARESETN
+    }
+    if { [string trim $src_rstn] == "" } {
+	GET_BD_PINS_OR_PORTS src_rstn $device_name/AXI_aresetn
     }
     
     connect_bd_net -quiet  $src_clk $dest_clk

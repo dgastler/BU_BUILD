@@ -7,6 +7,7 @@ proc IP_CORE_ILA {params} {
     set_required_values $params {probes} False
     set_optional_values $params [dict create EN_STRG_QUAL 1  ADV_TRIGGER false ALL_PROBE_SAME_MU_CNT 2 ENABLE_ILA_AXI_MON false MONITOR_TYPE Native ]
 
+    
     #build the core
     BuildCore $device_name ila
 
@@ -52,6 +53,9 @@ proc IP_CORE_ILA {params} {
     set_property -dict $property_list [get_ips ${device_name}]
     generate_target -force {all} [get_ips ${device_name}]
     synth_ip [get_ips ${device_name}]
+
+    Add_Global_Constant "__${device_name}__" "`define" 1 
+
     
 }
 

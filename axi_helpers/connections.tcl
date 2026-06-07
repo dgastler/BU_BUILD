@@ -174,8 +174,12 @@ proc AXI_PL_DEV_CONNECT {params} {
     if {[dict exists $params DECODER]} {
 	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
 	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
+    } else {
+	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+	UPDATE_DECODERS $device_name $new_addr $offset_mask { }
     }
 
+    
 }
 
 ## proc \c AXI_DEV_CONNECT
@@ -230,6 +234,31 @@ proc AXI_DEV_CONNECT {params} {
     
     AXI_SET_ADDR $device_name [dict get $params axi_control] $offset $range $force_mem
     AXI_GEN_DTSI $device_name $remote_slave $manual_load_dtsi $dt_data
+
+    #now that the design is validated, generate the DTSI_CHUNK file
+    if {$offset == -1} {
+	AXI_DEV_UIO_DTSI_CHUNK $device_name $dt_data
+    } else {
+	AXI_DEV_UIO_DTSI_CHUNK $device_name $dt_data
+    }
+
+    #generate dtsi file for DTBO generation if the is a remote slave
+    if {$remote_slave == 1} {
+        AXI_DEV_UIO_DTSI_OVERLAY ${device_name} ${manual_load_dtsi} $dt_data
+    }
+
+
+    #optional hdl decoder info
+    #@TODO move new_addr to a call and reuse it. 
+    set new_addr [format %X [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]    
+    if {[dict exists $params DECODER]} {
+    	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+    	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
+    } else {
+    	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+    	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict create]
+    }
+    
 }
 
 
@@ -269,6 +298,31 @@ proc AXI_LITE_DEV_CONNECT {params} {
     validate_bd_design -quiet 
 
     endgroup
+
+        #now that the design is validated, generate the DTSI_CHUNK file
+    if {$offset == -1} {
+	AXI_DEV_UIO_DTSI_CHUNK $device_name $dt_data
+    } else {
+	AXI_DEV_UIO_DTSI_CHUNK $device_name $dt_data
+    }
+
+    #generate dtsi file for DTBO generation if the is a remote slave
+    if {$remote_slave == 1} {
+        AXI_DEV_UIO_DTSI_OVERLAY ${device_name} ${manual_load_dtsi} $dt_data
+    }
+
+
+    #optional hdl decoder info
+    #@TODO move new_addr to a call and reuse it. 
+    set new_addr [format %X [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]  
+    if {[dict exists $params DECODER]} {
+	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
+    } else {
+	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+	UPDATE_DECODERS $device_name $new_addr $offset_mask { }
+    }
+
 }
 
 ## proc \c AXI_CTL_DEV_CONNECT
@@ -310,6 +364,31 @@ proc AXI_CTL_DEV_CONNECT {params} {
     validate_bd_design -quiet
 
     endgroup
+
+        #now that the design is validated, generate the DTSI_CHUNK file
+    if {$offset == -1} {
+	AXI_DEV_UIO_DTSI_CHUNK $device_name $dt_data
+    } else {
+	AXI_DEV_UIO_DTSI_CHUNK $device_name $dt_data
+    }
+
+    #generate dtsi file for DTBO generation if the is a remote slave
+    if {$remote_slave == 1} {
+        AXI_DEV_UIO_DTSI_OVERLAY ${device_name} ${manual_load_dtsi} $dt_data
+    }
+
+
+    #optional hdl decoder info
+    #@TODO move new_addr to a call and reuse it. 
+    set new_addr [format %X [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]  
+    if {[dict exists $params DECODER]} {
+	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
+    } else {
+	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
+	UPDATE_DECODERS $device_name $new_addr $offset_mask { }
+    }
+
 }
 
 ## proc \c CONNECT_AXI_MASTER_TO_INTERCONNECT

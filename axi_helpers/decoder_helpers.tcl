@@ -5,14 +5,17 @@ global decoders;    if {![info exists decoders]}    {set decoders [dict create]}
 global addr_tables; if {![info exists addr_tables]} {set addr_tables [dict create]}
 
 proc UPDATE_DECODERS {device_name device_offset device_mask decoder_node} {
-    set_required_values $decoder_node {TEMPLATE}
-
+    #set_required_values $decoder_node {TEMPLATE}
+    set_optional_values $decoder_node [dict create TEMPLATE { }]
+    pdict $decoder_node
     
     #set proper name DECODER_name (override if requested)
     if { [dict exists $decoder_node NAME] } {
 	set decoder_name [dict get $decoder_node NAME]
     } else {
-	set decoder_name "DECODER_$decoder_name"
+	#set decoder_name "DECODER_$decoder_name"
+	#set decoder_name "DECODER_$device_name"
+	set decoder_name "$device_name"
     }
 
     #access the global decoders variable
@@ -24,12 +27,20 @@ proc UPDATE_DECODERS {device_name device_offset device_mask decoder_node} {
 	#create an emtpy TABLES list if it doesn't exists
 	#we don't want to overwrite any existing entries
 	dict set decoders $decoder_name TABLES [dict create]
+	puts "Creating new entry for ${decoder_name}"
     }
     #set decoder construction values
-    dict set decoders $decoder_name TEMPLATE $TEMPLATE
+    if { [dict exists $decoder_node TEMPLATE] } {
+	set template [dict get $decoder_node TEMPLATE]
+	dict set decoders $decoder_name TEMPLATE ${template}
+	puts "Updating TEMPLATE for ${decoder_name} to ${template}"
+    }
     dict set decoders $decoder_name NAME $decoder_name
+    puts "Updating NAME for ${decoder_name} to ${decoder_name}"
     dict set decoders $decoder_name BASE_ADDR $device_offset
+    puts "Updating BASE_ADDR for ${decoder_name} to ${device_offset}"
     dict set decoders $decoder_name BASE_MASK $device_mask
+    puts "Updating BASE_MASK for ${decoder_name} to ${device_mask}"
 }
 
 proc PROCESS_ADDR_SPACE {space_name space_node} {
@@ -67,7 +78,7 @@ proc PROCESS_ADDR_SPACES {addr_spaces_node} {
 }
 
 
-proc GENERATE_ADDRESS_TABLE {output_path output_filename {decoder_filter ""} } {
+proc GENERATE_ADDRESS_TABLE {output_path output_filename {decoder_filter ""} } {    
     #create the output path if needed
     file mkdir $output_path
 
@@ -76,6 +87,9 @@ proc GENERATE_ADDRESS_TABLE {output_path output_filename {decoder_filter ""} } {
     set outfile [open $output_filename w]
 
     global decoders
+    global addr_tables
+    pdict $decoders
+    pdict $addr_tables
 
     #Find the longest name
     set name_length 0
