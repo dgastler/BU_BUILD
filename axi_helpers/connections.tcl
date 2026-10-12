@@ -250,7 +250,7 @@ proc AXI_DEV_CONNECT {params} {
 
     #optional hdl decoder info
     #@TODO move new_addr to a call and reuse it. 
-    set new_addr [format %X [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]    
+    set new_addr [format %d [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]    
     if {[dict exists $params DECODER]} {
     	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
     	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
@@ -314,7 +314,7 @@ proc AXI_LITE_DEV_CONNECT {params} {
 
     #optional hdl decoder info
     #@TODO move new_addr to a call and reuse it. 
-    set new_addr [format %X [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]  
+    set new_addr [format %d [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]  
     if {[dict exists $params DECODER]} {
 	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
 	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
@@ -380,7 +380,7 @@ proc AXI_CTL_DEV_CONNECT {params} {
 
     #optional hdl decoder info
     #@TODO move new_addr to a call and reuse it. 
-    set new_addr [format %X [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]  
+    set new_addr [format %d [lindex [get_property OFFSET [get_bd_addr_segs -regex .*SEG_${device_name}_(Reg|Control|Mem0).*]] 0] ]  
     if {[dict exists $params DECODER]} {
 	set offset_mask [expr [SanitizeVivadoSize $range] - 1]
 	UPDATE_DECODERS $device_name $new_addr $offset_mask [dict get $params DECODER]
