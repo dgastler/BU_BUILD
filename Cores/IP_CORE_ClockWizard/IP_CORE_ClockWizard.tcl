@@ -14,9 +14,6 @@
 # The output clock's name, with freqncy YY.ABCD will be named clk_YY_ABCD_MHZ
 # ABCD can be as long as Vivado allows
 proc IP_CORE_ClockWizard {params} {
-    global build_name
-    global apollo_root_path
-    global autogen_path
 
     set_required_values $params {device_name}
     set_required_values $params {in_clk_type}

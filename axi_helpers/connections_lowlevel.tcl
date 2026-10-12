@@ -33,6 +33,9 @@ proc AXI_BUS_CONNECT {device_name AXIM_PORT_NAME {ms_type "s"}} {
     if { [string trim $src] == "" } {
 	GET_BD_PINS_OR_PORTS src  $device_name
     }
+    if { [string trim $src] == "" } {
+        GET_BD_PINS_OR_PORTS src  $device_name/${MS_TYPE}AXI
+    }
 
     puts "Connecting ${src} to ${dest}"
     connect_bd_intf_net ${src} -boundary_type upper ${dest}

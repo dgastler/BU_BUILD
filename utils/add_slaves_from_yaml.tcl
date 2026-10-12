@@ -44,7 +44,9 @@ proc yaml_to_bd {yaml_file} {
 #
 # Any other name is just searched through for a TCL_CALL or INCLUDE_FILE directive.
 # It is convention that SUB_SLAVE is used to force TCL_CALL or INCLUDE_FILE directives to come AFTER processing the current TCL_CALL.
-proc huddle_to_bd {huddle parent} {    
+proc huddle_to_bd {huddle parent} {
+    #set get_stripped_cmd get_stripped
+    set get_stripped_cmd gets
     foreach key [huddle keys $huddle] {
         if { 0 == [string compare "TCL_CALL" $key] } {
 	    if { "string" == [huddle type $huddle $key] } {
@@ -57,7 +59,7 @@ proc huddle_to_bd {huddle parent} {
 		set tcl_call_huddle [huddle get $huddle $key]
 		puts $tcl_call_huddle
 		
-		set command "[huddle gets $tcl_call_huddle command]"
+		set command "[huddle $get_stripped_cmd $tcl_call_huddle command]"
 		set pairs [dict create]
 		
 		# set a default device name based on the node..
@@ -65,22 +67,30 @@ proc huddle_to_bd {huddle parent} {
 		dict append pairs device_name $parent
 		
 		foreach pairkey [huddle keys $tcl_call_huddle] {
+		    #add all pairs unless it is the special "command" key
 		    if { 0 != [string compare "command" $pairkey]} {
-			dict set pairs $pairkey [subst [huddle gets $tcl_call_huddle $pairkey]]
+			dict set pairs $pairkey [subst [huddle $get_stripped_cmd $tcl_call_huddle $pairkey]]
 		    }}
 		puts "\n\n\n"
 		puts "================================================================================"
 		puts "Executing command from YAML: $command \[dict create $pairs\]"
 		eval $command {$pairs}
+
 	    }	
         }
 	if { 0 == [string compare "INCLUDE_FILE" $key] } {
 	    #this is an include directive, load the file and move forward
-	    set include_huddle [subst [huddle gets $huddle $key]]
+	    set include_huddle [subst [huddle $get_stripped_cmd $huddle $key]]
 	    puts "loading sub-YAML file: $include_huddle"
 	    yaml_to_bd $include_huddle            
 	}
+	if { 0 == [string compare "ADDR_SPACES" $key] } {
+	    PROCESS_ADDR_SPACES [huddle $get_stripped_cmd $huddle $key]
+	}
 	if { 0 == [string compare "dict" [huddle type [huddle get $huddle $key]]]} {
+            huddle_to_bd [huddle get $huddle $key] $key
+        } elseif { 0 == [string compare "mapping" [huddle type [huddle get $huddle $key]]]} {
+	    #mapping seems to be new in 2025.1
             huddle_to_bd [huddle get $huddle $key] $key
         }
     }
@@ -115,16 +125,14 @@ proc huddle_to_bd {huddle parent} {
 #
 proc yaml_to_control_sets {yaml_file} {
     global build_name
-    global apollo_root_path
+    #global apollo_root_path
     global autogen_path
     global BD_PATH
 
     if { [dict exists [yaml::yaml2dict -file [subst $yaml_file]] "AXI_CONTROL_SETS"] } {
 	set dict [dict get [yaml::yaml2dict -file [subst $yaml_file]] "AXI_CONTROL_SETS"]
-	puts $dict
 	puts "Adding AXI Control Sets"
-	foreach key [dict keys $dict] {
-	    puts $key
+	foreach key [dict keys $dict] {	    
 	    if { 0 == [string compare "INCLUDE_FILE" $key] } {
 		#this is an include directive, load the file and move forward
 		set subfile [dict get $dict $key]

@@ -20,23 +20,23 @@ proc CheckExists { source_dict keys } {
 #################################################################################
 proc BuildCore {device_name core_type} {
     global build_name
-    global apollo_root_path
-    global autogen_path
+    #global PROJECT_PATH
+    #global AUTOGEN_PATH
 
-    set output_path ${apollo_root_path}/${autogen_path}/cores/    
+    #set output_path ${PROJECT_PATH}/${AUTOGEN_PATH}/cores/    
     
     #####################################
     #delete IP if it exists
     #####################################    
-    if { [file exists ${output_path}/${device_name}/${device_name}.xci] } {
-	file delete -force ${output_path}/${device_name}
-    }
+    #if { [file exists ${output_path}/${device_name}/${device_name}.xci] } {
+#	file delete -force ${output_path}/${device_name}
+ #   }
 
     #####################################
     #create IP            
     #####################################    
 
-    file mkdir ${output_path}
+  #  file mkdir ${output_path}
 
     #delete if it already exists
     if { [get_ips -quiet $device_name] == $device_name } {
@@ -46,8 +46,9 @@ proc BuildCore {device_name core_type} {
     #create
     puts $core_type
     puts $device_name
-    puts $output_path
-    create_ip -vlnv [get_ipdefs -filter "NAME == $core_type"] -module_name ${device_name} -dir ${output_path}
+    #puts $output_path
+    create_ip -vlnv [get_ipdefs -filter "NAME == $core_type"] -module_name ${device_name}
+    #-dir ${output_path}
     #put xci_file in the scope of the calling function
     upvar 1 xci_file x
     set x [get_files ${device_name}.xci]    
@@ -83,8 +84,8 @@ source -notrace ${BD_PATH}/Cores/IP_CORE_SYS_RESET/IP_CORE_SYS_RESET.tcl
 
 ##proc Build_iBERT {params} {
 ##    global build_name
-##    global apollo_root_path
-##    global autogen_path
+##    global PROJECT_PATH
+##    global AUTOGEN_PATH
 ##
 ##    set_required_values $params {device_name}
 ##    set_required_values $params {links}

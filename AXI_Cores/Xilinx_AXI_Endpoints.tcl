@@ -35,3 +35,17 @@ source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_IRQ_CTRL/AXI_IP_IRQ_SIMPLE.tcl
 source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_CDMA/AXI_IP_CDMA.tcl
 #AXI_IP_SYSTEM_ILA
 source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_SYSTEM_ILA/AXI_IP_SYSTEM_ILA.tcl
+#AXI_IP_TIMER
+source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_TIMER/AXI_IP_TIMER.tcl
+#AXI_IP_FIFO
+source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_FIFO/AXI_IP_FIFO.tcl
+#AXI_IP_QUAD_SPI
+source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_QUAD_SPI/AXI_IP_QUAD_SPI.tcl
+#AXI_IP_HWICAP
+source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_HWICAP/AXI_IP_HWICAP.tcl
+#AXI_IP_EPC
+source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_EPC/AXI_IP_EPC.tcl
+#AXI_IP_UBLAZE_DEBUG
+source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_UBLAZE_DEBUG/AXI_IP_UBLAZE_DEBUG.tcl
+#AXI_IP_UBLAZE
+#source -notrace ${BD_PATH}/AXI_Cores/AXI_IP_UBLAZE/AXI_IP_UBLAZE.tcl

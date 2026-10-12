@@ -2,7 +2,7 @@
 
 # \var dtsi_output_path
 #Location where the output dtsi/dtsi_chunk/dtsi_post_chunk files will be put
-global dtsi_output_path ;set dtsi_output_path "${apollo_root_path}/kernel/hw/${build_name}"
+global dtsi_output_path ;set dtsi_output_path "${DTSI_PATH}"
 
 # Global variable \c axi_memory_mappings_addr
 # A global variable containing all the address assignments.  Used for package and header listings of endpoint to address
@@ -27,8 +27,10 @@ proc BUILD_AXI_ADDR_TABLE {device_name {new_name  ""} } {
     }
     puts ${addr_seg}
     if {[string length ${addr_seg}] >0} {
-	set addr [format %08X [lindex [get_property -quiet OFFSET ${addr_seg}] 0] ]
-	set addr_range [format %08X [lindex [get_property -quiet RANGE ${addr_seg}] 0] ]
+	#set addr [format %08X [lindex [get_property -quiet OFFSET ${addr_seg}] 0] ]
+	set addr [lindex [get_property -quiet OFFSET ${addr_seg}] 0]
+	#set addr_range [format %08X [lindex [get_property -quiet RANGE ${addr_seg}] 0] ]
+	set addr_range [lindex [get_property -quiet RANGE ${addr_seg}] 0]
 	set name $device_name
 	if {[string length $new_name] > 0} {
 	    set name $new_name
@@ -226,6 +228,32 @@ proc AXI_DEV_UIO_DTSI_OVERLAY [list device_name  manual_load_dtsi [list dt_data 
     close ${dtsi_file}
 }
 
+## proc \c ComputeAddressRange
+# This function computes the lowest address (upvals as base_addr) and the highest addres - lowest (upvals as addr_range)
+proc ComputeAddressRange {} {
+    global axi_memory_mappings_addr
+    global axi_memory_mappings_range
+
+    upvar 1 base_addr base_addr
+    set base_addr 0xFFFFFFFFFFFFFFFF
+    set max_addr 0
+    foreach {slave addr} ${axi_memory_mappings_addr} {
+	#find the lowest starting address
+	if {$addr < $base_addr} {
+	    set base_addr $addr
+	}
+	
+	#find the highest possible address
+	set slave_range [dict get ${axi_memory_mappings_range} $slave]
+	set slave_end_addr [expr {$addr + $slave_range}]
+	if {$slave_end_addr > $max_addr} {
+	    set max_addr $slave_end_addr
+	}
+    }    
+    upvar 1 addr_range addr_range
+    set addr_range [expr {$max_addr - $base_addr}]
+}
+
 ## proc \c GENERATE_AXI_ADDR_MAP_C
 #Arguments:
 #  \param outFileName Name of file to write mapping to
@@ -233,17 +261,28 @@ proc AXI_DEV_UIO_DTSI_OVERLAY [list device_name  manual_load_dtsi [list dt_data 
 proc GENERATE_AXI_ADDR_MAP_C {outFileName} {
     global axi_memory_mappings_addr
     global axi_memory_mappings_range
+    file mkdir [file dirname ${outFileName}]
     set outFile [open ${outFileName} w+]
     puts ${outFile} "#ifndef __AXI_ADDR_MAP__" 
     puts ${outFile} "#define __AXI_ADDR_MAP__"
 
-    foreach {slave addr} ${axi_memory_mappings_addr} {
-	set line "#define AXI_ADDR_${slave} 0x${addr}" 	
+    #compute the base address and the range
+    set base_addr 0
+    set addr_range 0
+    ComputeAddressRange
+    set line [concat "#define BASE_ADDR " [format 0x%08X ${base_addr}]]
+    puts ${outFile} $line
+    set line [concat "#define ADDR_RANGE " [format 0x%08X ${addr_range}]]
+    puts ${outFile} $line
+
+    
+    foreach {slave addr} ${axi_memory_mappings_addr} {	
+	set line [concat "#define AXI_ADDR_${slave} " [format 0x%08X ${addr}]]
 	puts ${outFile} $line
     }
     puts ${outFile} "// ranges"
     foreach {slave range} ${axi_memory_mappings_range} {
-	set line "#define AXI_RANGE_${slave} 0x${range}" 	
+	set line [concat "#define AXI_RANGE_${slave} " [format 0x%08X ${range}]]
 	puts ${outFile} $line
     }
     puts ${outFile} "#endif" 
@@ -264,15 +303,64 @@ proc GENERATE_AXI_ADDR_MAP_VHDL {outFileName} {
     puts ${outFile} ""
     puts ${outFile} "package AXISlaveAddrPkg is"
 
+
+    #compute the base address and the range
+    set base_addr  0
+    set addr_range  0
+    ComputeAddressRange
+    set line [concat "constant BASE_ADDR : unsigned(31 downto 0) := " [format x\"%08X\" ${base_addr}] ";"]
+    puts ${outFile} $line
+    set line [concat "constant ADDR_RANGE : unsigned(31 downto 0) := " [format x\"%08X\" ${addr_range}] ";"]
+    puts ${outFile} $line
+
+    
     foreach {slave addr} ${axi_memory_mappings_addr} {
-	set line "constant AXI_ADDR_${slave} : unsigned(31 downto 0) := x\"${addr}\";" 	
+	set line [concat "constant AXI_ADDR_${slave} : unsigned(31 downto 0) := " [format x\"%08X\" ${addr}] ";"]
 	puts ${outFile} $line
     }
     puts ${outFile} "-- ranges"
     foreach {slave range} ${axi_memory_mappings_range} {
-	set line "constant AXI_RANGE_${slave} : unsigned(31 downto 0) :=  x\"${range}\";" 	
+	set line [concat "constant AXI_RANGE_${slave} : unsigned(31 downto 0) :=  " [format x\"%08X\" ${range}] ";"]
 	puts ${outFile} $line
     }
     puts ${outFile} "end package AXISlaveAddrPkg;" 
+    close ${outFile}
+}
+
+## proc \c GENERATE_AXI_ADDR_MAP_VERILOG
+#Arguments:
+#  \param outFileName Name of file to write mapping to
+# This function generates a VHDL package file with all the endpoint names and addr/range info
+proc GENERATE_AXI_ADDR_MAP_VERILOG {outFileName} {
+    global axi_memory_mappings_addr
+    global axi_memory_mappings_range
+    set outFile [open ${outFileName} w+]
+    
+    puts ${outFile} "`default_nettype none"
+    puts ${outFile} "//Autogenerated file, do not edit"
+    puts ${outFile} ""
+    puts ${outFile} "package AXISlaveAddrPkg ;"
+
+    #compute the base address and the range
+    set base_addr  0
+    set addr_range  0
+    ComputeAddressRange
+    set line [concat "parameter logic [31:0] BASE_ADDR = " [format 32'h%08X ${base_addr}] ";"]
+    puts ${outFile} $line
+    set line [concat "parameter logic [31:0] ADDR_RANGE = " [format 32'h%08X ${addr_range}] ";"]
+    puts ${outFile} $line
+
+    
+    foreach {slave addr} ${axi_memory_mappings_addr} {
+	set line [concat "parameter logic [31:0] AXI_ADDR_${slave} = " [format 32'h%08X ${addr}] ";"]	
+	puts ${outFile} $line
+    }
+    puts ${outFile} "// ranges"
+    foreach {slave range} ${axi_memory_mappings_range} {
+	set line [concat "parameter logic [31:0] AXI_RANGE_${slave} =  " [format 32'h%08X ${range}] ";"]
+	puts ${outFile} $line
+    }
+    puts ${outFile} "endpackage"
+    puts ${outFile} "`default_nettype wire"
     close ${outFile}
 }
